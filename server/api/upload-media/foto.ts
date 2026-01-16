@@ -25,7 +25,7 @@ export default defineEventHandler(async (event) => {
     
     const datas = await readFormData(event)
 
-    const id_user = datas.get("id_user")
+    const username = datas.get("username")
 
     const foto = datas.get("file")
 
@@ -33,11 +33,11 @@ export default defineEventHandler(async (event) => {
 
     const description_foto = datas.get("description")
 
-    if(!id_user || !foto || !title_foto || !description_foto) return
+    if(!username || !foto || !title_foto || !description_foto) return
 
     const formData = new FormData()
 
-    formData.set("id_user", id_user)
+    formData.set("username", username)
     formData.set("file", foto)
     formData.set("title", title_foto)
     formData.set("description", description_foto)

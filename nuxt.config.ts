@@ -2,6 +2,7 @@
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
+
   runtimeConfig: {
     public: {
       username_DB: import.meta.env.USERNAME,
@@ -16,5 +17,19 @@ export default defineNuxtConfig({
       supabase_URL: import.meta.env.SUPABASE_URL,
       supabase_Key: import.meta.env.SUPABASE_KEY
     }
-  }
+  },
+
+  vite: {
+    server: {
+      allowedHosts: ['nonsympathizing-gyrostatically-muoi.ngrok-free.dev']
+    }
+  },
+
+  routeRules: {
+    "/profile":{
+      ssr: true
+    }
+  },
+
+  modules: ['nuxt-toastify']
 })

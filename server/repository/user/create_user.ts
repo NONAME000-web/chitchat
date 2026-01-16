@@ -29,9 +29,9 @@ export const CreateUserRepository = async (datas: zod.infer<typeof CreateUserSch
 
         const SQL_INSERT_QUERY = 
         `INSERT INTO public.user(username, email, password) 
-        VALUES ('${resultParse.data.username}', '${resultParse.data.email}', '${hashedPassword}')`
+        VALUES ($1, $2, $3)`
 
-        const result = await pool.query(SQL_INSERT_QUERY)
+        const result = await pool.query(SQL_INSERT_QUERY, [resultParse.data.username, resultParse.data.email, hashedPassword])
 
         if(result.rowCount !== 0){
             return {

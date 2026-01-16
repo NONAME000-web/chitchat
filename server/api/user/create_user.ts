@@ -19,10 +19,7 @@ export default defineEventHandler(async (event) => {
 
         const result = await CreateUserRepository(datas)
         
-        return {
-            status: result?.status,
-            message: result?.message
-        }
+        return result
     } catch (error) {
         console.log(error)
     }

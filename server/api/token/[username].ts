@@ -13,5 +13,15 @@ export default defineEventHandler(async (event) => {
 
     const token = await redis.get(`session-${username}`)
 
-    console.log(token)
+    if(token)
+        return {
+            status: 200,
+            message: "Berhasil mengambil token",
+            token: token
+        }
+    else
+        return {
+            status: 400,
+            message: "Token tidak ada"
+        }
 })

@@ -3,5 +3,7 @@
 </script>
 
 <template>
-    <div><h1>YYadadadad</h1></div>
+    <div>
+        <h1>YYadadadad</h1>
+    </div>
 </template>

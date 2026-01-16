@@ -1,4 +1,3 @@
-import { useCookie } from "nuxt/app"
 import { LoginUserRepository } from "~~/server/repository/user/login_user"
 import redis from "~~/server/utils/redis_config"
 
@@ -30,14 +29,7 @@ export default defineEventHandler(async (event) => {
 
         if(token) await redis.setEx(session, 3600, token)       
 
-        const expiresDate = new Date(Date.now() + 60 * 60 * 1000)
-        setCookie(event, "id_user", result?.datas?.id_user, {expires: expiresDate})
-        setCookie(event, "username", username, {expires: expiresDate})
-
-        return {
-            status: 200,
-            message: "Berhasil Login"
-        }
+        return result
     } catch (error) {
         console.log(error)
     }

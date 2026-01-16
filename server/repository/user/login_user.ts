@@ -34,7 +34,6 @@ export const LoginUserRepository = async (datas: zod.infer<typeof LoginUserSchem
             status: 200, 
             message: "Berhasil Login",
             datas: {
-                id_user: result1.rows[0].id_user,
                 username: result1.rows[0].username,
             }
         }
