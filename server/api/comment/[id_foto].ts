@@ -9,9 +9,9 @@ export default defineEventHandler(async (event) => {
     
     const id_foto = event.context.params?.id_foto
 
-    const maxDatas = getHeaders(event)["max-forwards"]
-
-    const index = getHeaders(event)["accept-ranges"]
+    // const query = getQuery(event)
+ 
+    // const index = Number(query.indexPage)
 
     if(!id_foto) return
 

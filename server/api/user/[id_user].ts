@@ -1,4 +1,4 @@
-import { GetFotoRepository } from "~~/server/repository/beranda/get_foto"
+import { GetUserRepository } from "~~/server/repository/user/get_user"
 
 export default defineEventHandler(async (event) => {
     if(event.method !== "GET")
@@ -6,11 +6,15 @@ export default defineEventHandler(async (event) => {
             status: 400,
             message: "This endpoint use get method"
         }
+    
+    const id_user = Number(event.context.params?.id_user)
+
+    if(!id_user) return
 
     try {
-        const result = await GetFotoRepository()
+        const result = await GetUserRepository(id_user)
 
-        return result   
+        return result
     } catch (error) {
         console.log(error)
     }

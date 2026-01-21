@@ -16,12 +16,12 @@ type CommentData = {
   created_at: string
 }
 
-type GetCommentResponse = { status: number; message: string; datas: CommentData[] }
+type GetCommentResponse = { status: number; message: string; datas: CommentData[] } | null
 
 /* ================= PROPS & EMIT ================= */
 const props = defineProps<{
   dataFoto: DatasFoto
-  token: string
+  token: string | null
 }>()
 
 const emit = defineEmits<{
@@ -33,6 +33,7 @@ const comments = ref<CommentData[]>([])
 const loadingComment = ref(false)
 const username = useCookie("username").value
 const isSubmiting = ref(false)
+const index = ref(0)
 
 const datasComment = ref({
   id_foto: props.dataFoto.id_foto,
@@ -42,17 +43,23 @@ const datasComment = ref({
 
 /* ================= API ================= */
 const getComment = async () => {
-  let index = 0 //
-  let maxDatasComment = 5 //banyaknya data yang diambil di database
+  if(loadingComment.value) return
+
   try {
     loadingComment.value = true
     const { data } = await useFetch<GetCommentResponse>(`/api/comment/${props.dataFoto.id_foto}`,{
-      method: "GET"
+      method: "GET",
+      query: {
+        indexPage: index.value.toString()
+      }
     })
 
-    if (data.value?.status === 200) {
-      comments.value = data.value.datas
+    if (!data.value || data.value.datas.length === 0) {
+      loadingComment.value = false
+      return
     }
+
+    comments.value = data.value.datas
   } catch (err) {
     useToastify("Gagal memuat komentar", {
       type: "error",
@@ -66,6 +73,8 @@ const getComment = async () => {
 
 const submitComment = async () => {
   if (isSubmiting.value) return
+  if (!props.token) return
+
   isSubmiting.value = true
 
   try {
@@ -100,11 +109,14 @@ const submitComment = async () => {
     })
 
     datasComment.value.comment = ""
-    await getComment()
   } catch (err) {
     console.error(err)
   } finally {
     isSubmiting.value = false
+
+    index.value = 0
+    comments.value = []
+    getComment
   }
 }
 
@@ -289,6 +301,9 @@ onMounted(getComment)
   display: flex;
   flex-direction: column;
   gap: 0.8rem;
+
+  max-height: 260px;   /* ← WAJIB */
+  overflow-y: auto;    /* ← WAJIB */
 }
 
 .comment-item {

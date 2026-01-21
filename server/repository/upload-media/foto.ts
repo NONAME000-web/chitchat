@@ -1,4 +1,5 @@
 import pool from "~~/server/utils/db_config"
+import { UploadMedia } from "~~/server/utils/upload_media"
 
 export default async function UploadFotoRepository(value: FormData) {
     const datas = value
@@ -23,21 +24,19 @@ export default async function UploadFotoRepository(value: FormData) {
     const uniqueName = `${crypto.randomUUID()}.${ext}`
 
     try {
-        const resultUpload = await clientCDN.storage.from('First').upload(uniqueName, foto)
+        const resultUpload = await UploadMedia(uniqueName, foto)
         
-        if(resultUpload.error)
+        if(resultUpload && "status" in resultUpload)
             return {
                 status: 400,
                 message: "Upload Gagal"
             }
 
-        const url_foto = await clientCDN.storage.from('First').getPublicUrl(resultUpload.data.path)
-
         const SQL_QUERY_INSERT = 
         `INSERT INTO public.foto (id_user, title_foto, description_foto, url_foto, created_at)
         VALUES ($1, $2, $3, $4, $5)`
         
-        const result = await pool.query(SQL_QUERY_INSERT, [id_user, title, description, url_foto.data.publicUrl, new Date().toISOString()])
+        const result = await pool.query(SQL_QUERY_INSERT, [id_user, title, description, resultUpload?.data.publicUrl, new Date().toISOString()])
         
         if(!result.rowCount){
             return {
