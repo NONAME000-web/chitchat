@@ -29,8 +29,6 @@ const emit = defineEmits<{
 }>()
 
 /* ================= STATE ================= */
-const comments = ref<CommentData[]>([])
-const loadingComment = ref(false)
 const username = useCookie("username").value
 const isSubmiting = ref(false)
 const index = ref(0)
@@ -41,35 +39,13 @@ const datasComment = ref({
   comment: ""
 })
 
+// ================ UseAsyncData GetComment =========
+const {data: comment, refresh, pending} = await useAsyncData('get-comments',
+  () => $fetch<GetCommentResponse>(`/api/comment/${props.dataFoto.id_foto}`, {
+    method: "GET"
+  }))
+
 /* ================= API ================= */
-const getComment = async () => {
-  if(loadingComment.value) return
-
-  try {
-    loadingComment.value = true
-    const { data } = await useFetch<GetCommentResponse>(`/api/comment/${props.dataFoto.id_foto}`,{
-      method: "GET",
-      query: {
-        indexPage: index.value.toString()
-      }
-    })
-
-    if (!data.value || data.value.datas.length === 0) {
-      loadingComment.value = false
-      return
-    }
-
-    comments.value = data.value.datas
-  } catch (err) {
-    useToastify("Gagal memuat komentar", {
-      type: "error",
-      theme: "dark",
-      position: "top-center"
-    })
-  } finally {
-    loadingComment.value = false
-  }
-}
 
 const submitComment = async () => {
   if (isSubmiting.value) return
@@ -109,19 +85,17 @@ const submitComment = async () => {
     })
 
     datasComment.value.comment = ""
+
+    await refresh()
   } catch (err) {
     console.error(err)
   } finally {
     isSubmiting.value = false
 
     index.value = 0
-    comments.value = []
-    getComment
   }
 }
 
-/* ================= LIFECYCLE ================= */
-onMounted(getComment)
 </script>
 
 <template>
@@ -165,17 +139,17 @@ onMounted(getComment)
           <button type="submit">Kirim</button>
         </form>
 
-        <div v-if="loadingComment" class="comment-loading">
+        <div v-if="pending" class="comment-loading">
           Memuat komentar...
         </div>
 
-        <div v-else-if="comments.length === 0" class="comment-empty">
+        <div v-else-if="comment?.status !== 200" class="comment-empty">
           Belum ada komentar
         </div>
 
         <div class="comment-list">
           <div
-            v-for="(c, i) in comments"
+            v-for="(c, i) in comment?.datas"
             :key="i"
             class="comment-item"
           >

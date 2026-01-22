@@ -27,23 +27,17 @@ type GetUserResponse = {
 }
 
 /* ================= STATE ================= */
-const dataFotos = ref<Fotos[]>([])
 const usernames = ref<Record<number, string>>({})
 const token = ref<string | null>(null)
 const dataFotoSelected = ref<Fotos>()
 
+// ================= UseAsyncData GetFotos =================
+const {data: allFotos, pending} = await useAsyncData('allFotos', () =>
+  $fetch<GetFotoResponse>('/api/beranda/foto/get_foto', {
+    method: 'GET'
+  })
+)
 /* ================= API ================= */
-const getFoto = async () => {
-  const { data } = await useFetch<GetFotoResponse>(
-    "/api/beranda/foto/get_foto",
-    { server: false }
-  )
-
-  if (!data.value || data.value.status !== 200) return
-
-  dataFotos.value = data.value.foto
-  await fetchUsernames(data.value.foto)
-}
 
 const fetchUsernames = async (fotos: Fotos[]) => {
   const uniqueUserIds = [...new Set(fotos.map(f => f.id_user))]
@@ -65,11 +59,11 @@ const fetchUsernames = async (fotos: Fotos[]) => {
 }
 
 const getToken = async () => {
-  const data = await $fetch<{ status: number, message: string, token: string }>(`/api/token/${username}`, {
+  const data = await $fetch<{ status: number, message: string, token: string }>(`/api/token/${username.value}`, {
     method: 'GET'
   })
 
-  if(data.status !== 200){
+  if(data.status !== 200 || !data){
     console.error('Gagal mendapatkan token')
     return
   }
@@ -94,7 +88,7 @@ const onClickCardFoto = (dataFoto: Fotos) => {
 
 /* ================= LIFECYCLE ================= */
 watchEffect(async() => {
-    await getFoto()
+  await fetchUsernames(allFotos.value?.foto || [])
 })
 
 onMounted(async () => {
@@ -112,13 +106,17 @@ onMounted(async () => {
 
     <!-- CONTENT -->
     <section class="content">
-      <div v-if="dataFotos.length === 0" class="empty">
-        Tidak ada foto
+      <div v-if="pending" class="empty">
+        Loading foto...
+      </div>
+
+      <div v-else-if="allFotos?.status !== 200" class="empty">
+        <p>Belum ada postingan. Yuk upload yang pertama!</p>
       </div>
 
       <div class="foto-grid">
         <div
-          v-for="foto in dataFotos"
+          v-for="foto in allFotos?.foto"
           :key="foto.id_foto"
           class="foto-card"
           @click="onClickCardFoto(foto)"

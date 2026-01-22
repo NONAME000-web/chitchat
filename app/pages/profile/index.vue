@@ -2,9 +2,7 @@
 import type CardFoto from '~/components/CardFoto.vue';
 import FormUpload from '~/components/formUpload.vue'
 
-type GetTokenResponse =
-  | { status: 200; message: string; token: string }
-  | { status: number; message: string; token: string }
+type GetTokenResponse = { status: number; message: string; token: string }
 
 type DatasFoto = {
   id_foto: number
@@ -15,15 +13,11 @@ type DatasFoto = {
   created_at: string
 }
 
-type GetFotoResponse =
-  | { status: 200; message: string; datas: DatasFoto[] }
-  | { status: number; message: string; datas: DatasFoto[]}
+type GetFotoResponse = { status: number; message: string; datas: DatasFoto[] }
 
 const username = useCookie<string | null>('username')
 const hasToken = ref<string | null>(null)
 const isClosed = ref(true) //menutup formUpload
-const fotos = ref<DatasFoto[]>([])
-const loading = ref(false)
 const hasSelectedData = ref<DatasFoto>()
 
 /* Ambil token */
@@ -35,37 +29,13 @@ if (username.value) {
 }
 
 /* Ambil foto */
-const getFotos = async () => {
-  if (!hasToken.value || !username.value) return
-
-  loading.value = true
-  try {
-    const { data } = await useFetch<GetFotoResponse>(
-      `/api/media/foto/${username.value}`,
-      {
-        headers: {
-          Authorization: hasToken.value
-        }
-      }
-    )
-
-    if (data.value?.status === 200) {
-      fotos.value = data.value.datas
+const {data: allFotos, pending} = await useAsyncData('profile-fotos', () =>
+  $fetch<GetFotoResponse>(`/api/media/foto/${username.value}`, {
+    headers: {
+      Authorization: hasToken.value || ''
     }
-  } catch {
-    useToastify("Gagal memuat foto", {
-      type: "error",
-      theme: "dark",
-      position: "top-center"
-    })
-  } finally {
-    loading.value = false
-  }
-}
-
-watchEffect(async() => {
-    if(hasToken) await getFotos()
-})
+  })
+)
 
 const openFormUpload = async () => isClosed.value = false
 const closeFormUpload = () => isClosed.value = true
@@ -96,17 +66,17 @@ const onClickCardFoto = async (foto: DatasFoto) => hasSelectedData.value = foto
       <button class="fab" @click="openFormUpload">+</button>
 
       <!-- CONTENT -->
-      <div v-if="loading" class="loading">
+      <div v-if="pending" class="loading">
         Memuat postingan...
       </div>
 
-      <div v-else-if="fotos.length === 0" class="empty-state">
+      <div v-else-if="allFotos?.status !== 200" class="empty-state">
         <p>Belum ada postingan. Yuk upload yang pertama!</p>
       </div>
 
       <div v-else class="posts-grid">
         <div
-          v-for="foto in fotos"
+          v-for="foto in allFotos?.datas"
           :key="foto.id_foto"
           class="post-card"
           @click="onClickCardFoto(foto)"
