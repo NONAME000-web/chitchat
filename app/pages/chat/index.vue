@@ -82,7 +82,6 @@ type Room = {
     }
 
     const onClickRoom = (room: Room) => {
-        console.log('Clicked room:', room)
         navigateTo(`/chat/room/${room.id_room}`)
     }
 

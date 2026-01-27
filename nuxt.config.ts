@@ -28,6 +28,9 @@ export default defineNuxtConfig({
   routeRules: {
     "/profile":{
       ssr: true
+    },
+    "/": {
+      ssr: true
     }
   },
 
