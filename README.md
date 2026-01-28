@@ -2,7 +2,7 @@ PROJECT PRIBADI ADE AHMAD FERDI
 TAHUN 2026 
 
 TEKNOLOGI:
-NUXT JS (fullstack)
+NUXT JS (fullstack backend/frontend)
 SUPABASE (cloud storage, database websocket real-time)
 POSTGRESQL
 JWT TOKEN
