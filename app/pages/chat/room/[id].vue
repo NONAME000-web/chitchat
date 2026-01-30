@@ -46,7 +46,7 @@ const fetchMessages = async () => {
     .from('chat')
     .select('*')
     .eq('id_room', roomId)
-    .order('created_at', { ascending: false })
+    .order('created_at', { ascending: true })
 
   if (data) {
     allMessages.value = data
